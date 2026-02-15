@@ -95,7 +95,7 @@ internal static class AvroSchemaGen
             return "string";
         if (type == typeof(byte[]))
             return "bytes";
-        if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+        if (type == typeof(DateTime) || type == typeof(DateTimeOffset) || type.FullName == "System.DateOnly")
             return new Dictionary<string, object>
             {
                 ["type"] = "long",

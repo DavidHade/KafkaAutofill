@@ -11,7 +11,7 @@
         
         <!-- Package metadata -->
         <PackageId>Kafka.Autofill</PackageId>
-        <Version>0.7.2</Version>
+        <Version>0.9.0</Version>
         <Authors>David Hade</Authors>
         <Company>David Hade</Company>
         <Description>Source generator for Apache Avro serialization in Kafka. Automatically generates Get/Put methods and schema for ISpecificRecord implementations.</Description>
@@ -21,6 +21,7 @@
         <PackageTags>kafka;avro;serialization;source-generator;analyzer</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <DevelopmentDependency>true</DevelopmentDependency>
     </PropertyGroup>
@@ -33,6 +34,7 @@
 
     <ItemGroup>
       <None Include="../README.md" Pack="true" PackagePath="/" />
+      <None Include="../icon.png" Pack="true" PackagePath="/" />
     </ItemGroup>
 
     <ItemGroup>

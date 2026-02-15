@@ -23,6 +23,9 @@ public partial class Person2 : ISpecificRecord
     public byte[] ProfilePicture { get; set; } = [];
     
     // DateTime types
+    public DateOnly DateOfBirth { get; set; }
+    public DateOnly? OptionalDateOfBirthNonNull { get; set; }
+    public DateOnly? OptionalDateOfBirthNull { get; set; }
     public DateTime BirthDate { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     

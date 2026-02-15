@@ -4,6 +4,7 @@ using Avro.Specific;
 
 namespace Kafka.Autofill.Tests.Person3;
 
+// Only used in Benchmarks
 [KafkaAutofill(false)]
 public partial class Person3 : ISpecificRecord
 {

@@ -137,8 +137,8 @@ internal static class PropertyValidator
 
         var fullTypeName = type.ToDisplayString();
         
-        // Date/time types
-        if (fullTypeName is "System.DateTime" or "System.DateTimeOffset" or "System.Guid")
+        // Date/time types & Guid
+        if (fullTypeName is "System.DateTime" or "System.DateTimeOffset" or "System.DateOnly" or "System.Guid")
             return true;
 
         return false;

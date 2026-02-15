@@ -95,6 +95,9 @@ public class AutofillTests
         Assert.Contains(schema.Fields, f => f.Name == "ProfilePicture");
 
         // Dates & Guid
+        Assert.Contains(schema.Fields, f => f.Name == "DateOfBirth");
+        Assert.Contains(schema.Fields, f => f.Name == "OptionalDateOfBirthNonNull");
+        Assert.Contains(schema.Fields, f => f.Name == "OptionalDateOfBirthNull");
         Assert.Contains(schema.Fields, f => f.Name == "BirthDate");
         Assert.Contains(schema.Fields, f => f.Name == "CreatedAt");
         Assert.Contains(schema.Fields, f => f.Name == "Id");
@@ -129,7 +132,7 @@ public class AutofillTests
         Assert.Contains(schema.Fields, f => f.Name == "PreviousAddresses");
         Assert.Contains(schema.Fields, f => f.Name == "AddressBook");
     }
-
+    
     [Fact]
     public void Person_Get_And_Put_Should_Be_Reversible()
     {
@@ -146,6 +149,9 @@ public class AutofillTests
             Name = "John Doe",
             ProfilePicture = [1, 2, 3],
             BirthDate = new DateTime(1994, 1, 15),
+            DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow),
+            OptionalDateOfBirthNonNull = DateOnly.FromDateTime(DateTime.UtcNow),
+            OptionalDateOfBirthNull = null,
             CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
             Id = Guid.NewGuid(),
             OptionalAge = 25,
@@ -443,6 +449,8 @@ public class AutofillTests
             Name = "Alice",
             ProfilePicture = [5, 6, 7, 8],
             BirthDate = birthDate,
+            DateOfBirth = DateOnly.FromDateTime(birthDate),
+            OptionalDateOfBirthNull = null,
             Id = guid
         };
 
@@ -468,6 +476,14 @@ public class AutofillTests
         var birthDateField = schema.Fields.FirstOrDefault(f => f.Name == "BirthDate");
         Assert.NotNull(birthDateField);
         Assert.Equal(birthDate, person.Get(birthDateField.Pos));
+        
+        var dateOfBirthField = schema.Fields.FirstOrDefault(f => f.Name == "DateOfBirth");
+        Assert.NotNull(dateOfBirthField);
+        Assert.Equal(birthDate, person.Get(dateOfBirthField.Pos));
+        
+        var dateOfBirthOptionalField = schema.Fields.FirstOrDefault(f => f.Name == "OptionalDateOfBirthNull");
+        Assert.NotNull(dateOfBirthOptionalField);
+        Assert.Null(person.Get(dateOfBirthOptionalField.Pos));
 
         var idField = schema.Fields.FirstOrDefault(f => f.Name == "Id");
         Assert.NotNull(idField);

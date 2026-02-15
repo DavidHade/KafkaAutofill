@@ -1,8 +1,10 @@
 using Avro.Specific;
+using Kafka.Autofill;
 
 namespace Nuget.Test;
 
-public partial class Person
+[KafkaAutofill]
+public partial class Person : ISpecificRecord
 {
     public int Age { get; set; }
     public uint UnsignedAge { get; set; }
@@ -40,7 +42,8 @@ public partial class Person
     public Dictionary<string, Address> AddressBook { get; set; } = [];
 }
 
-public partial class Address
+[KafkaAutofill]
+public partial class Address : ISpecificRecord
 {
     public string Street { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

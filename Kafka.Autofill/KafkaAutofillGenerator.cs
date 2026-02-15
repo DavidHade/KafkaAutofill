@@ -221,6 +221,7 @@ internal class KafkaAutofill : IIncrementalGenerator
     private static string GenerateGetConversion(ITypeSymbol type, string propertyName)
     {
         var specialType = type.SpecialType;
+        var fullTypeName = type.ToDisplayString();
 
         // Handle nullable value types
         if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } namedType)
@@ -234,6 +235,10 @@ internal class KafkaAutofill : IIncrementalGenerator
             if (underlyingSpecialType == SpecialType.System_UInt64)
                 return $"{propertyName}.HasValue ? System.BitConverter.GetBytes({propertyName}.Value) : (byte[]?)null";
 
+            // DateOnly
+            if(underlyingType.ToDisplayString() == "System.DateOnly")
+                return $"{propertyName}?.ToDateTime(TimeOnly.MinValue)";
+            
             // Other nullable types (int?, double?, bool?, etc.)
             return propertyName;
         }
@@ -241,6 +246,9 @@ internal class KafkaAutofill : IIncrementalGenerator
         // Decimal -> cast to double
         if (specialType == SpecialType.System_Decimal)
             return $"(double){propertyName}";
+        
+        if(fullTypeName == "System.DateOnly")
+            return $"{propertyName}.ToDateTime(TimeOnly.MinValue)";
         
         // Unsigned types -> cast to int/long or bytes
         if (specialType == SpecialType.System_UInt16)
@@ -274,12 +282,15 @@ internal class KafkaAutofill : IIncrementalGenerator
             var underlyingType = namedType.TypeArguments[0];
             var underlyingTypeName = underlyingType.ToDisplayString();
             
-            // Nullable DateTime from long timestamp
+            // Nullable DateTime & DateOnly
             if (underlyingTypeName == "System.DateTime")
                 return $"(DateTime?){expr}";
 
             if (underlyingTypeName == "System.DateTimeOffset")
                 return $"(DateTimeOffset?){expr}";
+            
+            if(underlyingTypeName == "System.DateOnly")
+                return $"{expr} == null ? (DateOnly?)null : DateOnly.FromDateTime((DateTime){expr})";
             
             // Nullable Guid from string
             if (underlyingTypeName == "System.Guid")
@@ -314,16 +325,10 @@ internal class KafkaAutofill : IIncrementalGenerator
 
         // Unsigned types - convert from long/bytes
         if (specialType == SpecialType.System_UInt32)
-        {
-            namespaces.Add("System");
             return $"(uint)Convert.ToInt64({expr})";
-        }
 
         if (specialType == SpecialType.System_UInt64)
-        {
-            namespaces.Add("System");
             return $"BitConverter.ToUInt64((byte[]){expr}, 0)";
-        }
         
         // Decimal - Avro equivalent type is double
         if (specialType == SpecialType.System_Decimal)
@@ -331,16 +336,14 @@ internal class KafkaAutofill : IIncrementalGenerator
         
         // DateTime from long timestamp-millis
         if (fullTypeName == "System.DateTime")
-        {
-            namespaces.Add("System");
             return $"(DateTime){expr}";
-        }
+        
+        // DateOnly
+        if(fullTypeName == "System.DateOnly")
+            return $"DateOnly.FromDateTime((DateTime){expr})";
 
         if (fullTypeName == "System.DateTimeOffset")
-        {
-            namespaces.Add("System");
             return $"(DateTimeOffset){expr}";
-        }
         
         // Guid from string
         if (fullTypeName == "System.Guid")
@@ -355,27 +358,24 @@ internal class KafkaAutofill : IIncrementalGenerator
         
         // Arrays - Avro deserializes as IList or object[], cast to array type
         if (type is IArrayTypeSymbol)
-        {
             return $"({fullTypeName}){expr}";
-        }
         
         // Generic types (collections, dictionaries)
         if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
         {
             var genericDef = namedType.OriginalDefinition.ToDisplayString();
+            namespaces.Add("System.Collections.Generic");
             
             // HashSet - Avro returns IEnumerable, cast and wrap
             if (genericDef.StartsWith("System.Collections.Generic.HashSet<"))
             {
                 var elementType = namedType.TypeArguments[0].Name;
-                namespaces.Add("System.Collections.Generic");
                 return $"new HashSet<{elementType}>((IEnumerable<{elementType}>){expr})";
             }
             
             // List - direct cast
             if (genericDef.StartsWith("System.Collections.Generic.List<"))
             {
-                namespaces.Add("System.Collections.Generic");
                 var elementType = namedType.TypeArguments[0].Name;
                 return $"({type.Name}<{elementType}>){expr}";
             }
@@ -385,7 +385,6 @@ internal class KafkaAutofill : IIncrementalGenerator
                 genericDef.StartsWith("System.Collections.Generic.ICollection<") ||
                 genericDef.StartsWith("System.Collections.Generic.IList<"))
             {
-                namespaces.Add("System.Collections.Generic");
                 var elementType = namedType.TypeArguments[0].Name;
                 return $"({type.Name}<{elementType}>){expr}";
             }
@@ -394,7 +393,6 @@ internal class KafkaAutofill : IIncrementalGenerator
             if (genericDef.StartsWith("System.Collections.Generic.Dictionary<") ||
                 genericDef.StartsWith("System.Collections.Generic.IDictionary<"))
             {
-                namespaces.Add("System.Collections.Generic");
                 var key = namedType.TypeArguments[0].Name;
                 var val = namedType.TypeArguments[1].Name;
                 return $"({type.Name}<{key}, {val}>){expr}";
