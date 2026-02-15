@@ -31,6 +31,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Include="../README.md" Pack="true" PackagePath="/" />
+    </ItemGroup>
+
+    <ItemGroup>
       <EmbeddedResource Include="AvroSchemaGen.cs" />
       <None Remove="AvroSchemaGen.cs" />
       <EmbeddedResource Include="AvroIgnoreAttribute.cs" />
