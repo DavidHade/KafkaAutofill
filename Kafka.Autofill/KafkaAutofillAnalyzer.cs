@@ -8,7 +8,7 @@ namespace Kafka.Autofill;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 internal class KafkaAutofillAnalyzer : DiagnosticAnalyzer
 {
-    private const string KafkaAutofillAttribute = "Kafka.Autofill.KafkaAutofillAttribute";
+    private const string KafkaAutofillAttributeName = "Kafka.Autofill.KafkaAutofillAttribute";
 
     internal static readonly DiagnosticDescriptor UnsupportedTypeError = new(
         id: "KAFKA001",
@@ -28,36 +28,42 @@ internal class KafkaAutofillAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
 
-        // Register for symbol analysis
-        context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
+        // Register compilation start action to cache attribute symbol
+        context.RegisterCompilationStartAction(compilationContext =>
+        {
+            // Resolve the attribute symbol once per compilation
+            var attributeSymbol = compilationContext.Compilation.GetTypeByMetadataName(KafkaAutofillAttributeName);
+            if (attributeSymbol == null)
+                return; // Attribute not available in this compilation
+
+            // Register symbol analysis with cached attribute symbol
+            compilationContext.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
+        });
     }
 
     private static void AnalyzeNamedType(SymbolAnalysisContext context)
     {
         var namedTypeSymbol = (INamedTypeSymbol)context.Symbol;
-
-        // Check if the class has the KafkaAutofill attribute
+        
         var hasKafkaAutofillAttribute = namedTypeSymbol.GetAttributes()
-            .Any(attr => attr.AttributeClass?.ToDisplayString() == KafkaAutofillAttribute);
+            .Any(attr => attr.AttributeClass?.ToDisplayString() == KafkaAutofillAttributeName);
 
         if (!hasKafkaAutofillAttribute)
             return;
-
-        // Get all public properties
+        
         var properties = namedTypeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
             .Where(p => p.DeclaredAccessibility == Accessibility.Public && 
                         !p.IsStatic && 
                         !p.IsIndexer &&
-                        p.Name != "Schema")
-            .ToList();
-
-        // Validate properties using shared logic
+                        p.Name != "Schema");
+        
         var unsupportedProperties = PropertyValidator.ValidateProperties(properties);
-
-        // Report diagnostics for each unsupported property
+        
         foreach (var (property, reason) in unsupportedProperties)
         {
+            context.CancellationToken.ThrowIfCancellationRequested();
+
             var location = property.Locations.FirstOrDefault();
             if (location != null)
             {

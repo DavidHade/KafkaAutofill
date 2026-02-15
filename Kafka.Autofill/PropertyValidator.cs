@@ -1,18 +1,24 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace Kafka.Autofill;
 
 internal static class PropertyValidator
 {
-    public static IEnumerable<(IPropertySymbol property, string reason)> ValidateProperties(
+    private static readonly Dictionary<ITypeSymbol, string?> ValidationCache = 
+        new(SymbolEqualityComparer.Default);
+
+    public static List<(IPropertySymbol property, string reason)> ValidateProperties(
         IEnumerable<IPropertySymbol> properties)
     {
         var unsupportedProperties = new List<(IPropertySymbol property, string reason)>();
         
+        ValidationCache.Clear();
+        
         foreach (var property in properties)
         {
-            var reason = ValidatePropertyType(property.Type);
+            var reason = ValidatePropertyType(property.Type, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
             if (reason != null)
             {
                 unsupportedProperties.Add((property, reason));
@@ -22,94 +28,131 @@ internal static class PropertyValidator
         return unsupportedProperties;
     }
 
-    private static string? ValidatePropertyType(ITypeSymbol type)
+    private static string? ValidatePropertyType(ITypeSymbol type, HashSet<ITypeSymbol> visitedTypes)
     {
-        // Handle nullable value types
+        if (ValidationCache.TryGetValue(type, out var cachedResult))
+            return cachedResult;
+        
+        if (!visitedTypes.Add(type))
+            return null;
+
+        var result = ValidatePropertyTypeInternal(type, visitedTypes);
+        ValidationCache[type] = result;
+        return result;
+    }
+
+    private static string? ValidatePropertyTypeInternal(ITypeSymbol type, HashSet<ITypeSymbol> visitedTypes)
+    {
+        // Nullable
         if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } namedType)
         {
-            return ValidatePropertyType(namedType.TypeArguments[0]);
+            return ValidatePropertyType(namedType.TypeArguments[0], visitedTypes);
         }
-
-        // Check for supported primitive types
+        
         if (IsSupportedPrimitiveType(type))
             return null;
-
-        // Arrays
-        if (type is IArrayTypeSymbol arrayType)
-        {
-            return ValidatePropertyType(arrayType.ElementType);
-        }
-
-        // Generic collections
-        if (type is INamedTypeSymbol genericType && genericType.IsGenericType)
-        {
-            var genericDef = genericType.OriginalDefinition.ToDisplayString();
-            
-            // Supported collection types
-            if (genericDef.StartsWith("System.Collections.Generic.List<") ||
-                genericDef.StartsWith("System.Collections.Generic.HashSet<") ||
-                genericDef.StartsWith("System.Collections.Generic.IEnumerable<") ||
-                genericDef.StartsWith("System.Collections.Generic.ICollection<") ||
-                genericDef.StartsWith("System.Collections.Generic.IList<"))
-            {
-                return ValidatePropertyType(genericType.TypeArguments[0]);
-            }
-
-            // Dictionary types
-            if (genericDef.StartsWith("System.Collections.Generic.Dictionary<") ||
-                genericDef.StartsWith("System.Collections.Generic.IDictionary<"))
-            {
-                var keyType = genericType.TypeArguments[0];
-                if (keyType.SpecialType != SpecialType.System_String)
-                {
-                    return $"Dictionary key type '{keyType.Name}' is not supported (only string keys are allowed)";
-                }
-                return ValidatePropertyType(genericType.TypeArguments[1]);
-            }
-        }
-
-        // Enums are supported
+        
         if (type.TypeKind == TypeKind.Enum)
             return null;
-
-        // Check for system/framework types that should not be serialized
-        var typeNamespace = type.ContainingNamespace?.ToDisplayString();
-        var isSystemType = typeNamespace?.StartsWith("System") ?? false;
-        var isMicrosoftType = typeNamespace?.StartsWith("Microsoft") ?? false;
         
-        // Check if it's a delegate
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            return ValidatePropertyType(arrayType.ElementType, visitedTypes);
+        }
+        
+        if (type is INamedTypeSymbol genericType && genericType.IsGenericType)
+        {
+            var originalDef = genericType.OriginalDefinition;
+            var typeNamespace = originalDef.ContainingNamespace;
+            
+            if (IsSystemCollectionsGeneric(typeNamespace))
+            {
+                var typeName = originalDef.Name;
+                
+                if (typeName is "List" or "HashSet" or "IEnumerable" or "ICollection" or "IList")
+                {
+                    return ValidatePropertyType(genericType.TypeArguments[0], visitedTypes);
+                }
+                
+                if (typeName is "Dictionary" or "IDictionary")
+                {
+                    var keyType = genericType.TypeArguments[0];
+                    if (keyType.SpecialType != SpecialType.System_String)
+                    {
+                        return $"Dictionary key type '{keyType.Name}' is not supported (only string keys are allowed)";
+                    }
+                    return ValidatePropertyType(genericType.TypeArguments[1], visitedTypes);
+                }
+            }
+        }
+        
         if (type.TypeKind == TypeKind.Delegate)
         {
+            var typeNamespace = GetNamespaceName(type);
             return $"Delegate type '{type.Name}' from namespace '{typeNamespace}' is not supported in Avro schema";
         }
-
-        // Reject system/Microsoft types that aren't already handled
-        if (isSystemType || isMicrosoftType)
+        
+        if (IsSystemOrMicrosoftType(type))
         {
+            var typeNamespace = GetNamespaceName(type);
             return $"Type '{type.Name}' from namespace '{typeNamespace}' is not supported in Avro schema";
         }
 
         // User-defined classes and structs - validate their properties recursively
         if (type.TypeKind == TypeKind.Class || (type.TypeKind == TypeKind.Struct && !type.IsTupleType))
         {
-            var members = type.GetMembers();
-            foreach (var member in members)
+            // Use GetMembers() with specific filter to only get properties
+            var properties = type.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.DeclaredAccessibility == Accessibility.Public);
+
+            foreach (var property in properties)
             {
-                if (member is IPropertySymbol property && 
-                    property.DeclaredAccessibility == Accessibility.Public && 
-                    !property.IsStatic)
+                var error = ValidatePropertyType(property.Type, visitedTypes);
+                if (error != null)
                 {
-                    var error = ValidatePropertyType(property.Type);
-                    if (error != null)
-                    {
-                        return $"Property '{property.Name}' has unsupported type: {error}";
-                    }
+                    return $"Property '{property.Name}' has unsupported type: {error}";
                 }
             }
             return null; // User-defined type with valid properties
         }
 
-        return $"Type '{type.Name}' from namespace '{typeNamespace}' is not supported in Avro schema";
+        var ns = GetNamespaceName(type);
+        return $"Type '{type.Name}' from namespace '{ns}' is not supported in Avro schema";
+    }
+
+    private static bool IsSystemCollectionsGeneric(INamespaceSymbol? namespaceSymbol)
+    {
+        if (namespaceSymbol == null) return false;
+        
+        // Walk up namespace hierarchy efficiently
+        if (namespaceSymbol.Name != "Generic") return false;
+        namespaceSymbol = namespaceSymbol.ContainingNamespace;
+        
+        if (namespaceSymbol.Name != "Collections") return false;
+        namespaceSymbol = namespaceSymbol.ContainingNamespace;
+        
+        if (namespaceSymbol.Name != "System") return false;
+        
+        return namespaceSymbol.ContainingNamespace?.IsGlobalNamespace ?? false;
+    }
+
+    private static bool IsSystemOrMicrosoftType(ITypeSymbol type)
+    {
+        var ns = type.ContainingNamespace;
+        while (ns != null && !ns.IsGlobalNamespace)
+        {
+            var name = ns.Name;
+            if (name == "System" || name == "Microsoft")
+                return true;
+            ns = ns.ContainingNamespace;
+        }
+        return false;
+    }
+
+    private static string GetNamespaceName(ITypeSymbol type)
+    {
+        return type.ContainingNamespace?.ToDisplayString() ?? string.Empty;
     }
 
     private static bool IsSupportedPrimitiveType(ITypeSymbol type)

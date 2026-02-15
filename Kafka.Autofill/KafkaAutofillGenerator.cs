@@ -117,7 +117,7 @@ internal class KafkaAutofill : IIncrementalGenerator
         List<IPropertySymbol> properties,
         ClassDeclarationSyntax classDeclaration)
     {
-        var unsupportedProperties = PropertyValidator.ValidateProperties(properties).ToList();
+        var unsupportedProperties = PropertyValidator.ValidateProperties(properties);
 
         if (!unsupportedProperties.Any())
             return true;
