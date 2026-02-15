@@ -44,9 +44,10 @@ internal static class AvroSchemaGen
 
     private static IEnumerable<Dictionary<string, object>> GenerateFields(Type type, HashSet<string> definedTypes)
     {
+        var avroIgnoreAttr = Type.GetType("Kafka.Autofill.AvroIgnoreAttribute")!;
         var publicFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
         var fields = publicFields
-            .Where(field => field.GetCustomAttribute<AvroIgnoreAttribute>() == null)
+            .Where(field => field.GetCustomAttribute(avroIgnoreAttr) == null)
             .Select(field => new Dictionary<string, object>
             {
                 ["name"] = field.Name,
@@ -55,7 +56,7 @@ internal static class AvroSchemaGen
         
         var publicProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         var properties = publicProperties
-            .Where(property => property.GetCustomAttribute<AvroIgnoreAttribute>() == null)
+            .Where(property => property.GetCustomAttribute(avroIgnoreAttr) == null)
             .Select(property => new Dictionary<string, object>
             {
                 ["name"] = property.Name, 

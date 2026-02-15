@@ -16,6 +16,8 @@ internal class KafkaAutofill : IIncrementalGenerator
 {
     private const string KafkaAutofillAttribute = "Kafka.Autofill.KafkaAutofillAttribute";
     private static readonly string AvroGenSrc = LoadResource("Kafka.Autofill.AvroSchemaGen.cs");
+    private static readonly string AvroIgnoreSrc = LoadResource("Kafka.Autofill.AvroIgnoreAttribute.cs");
+    private static readonly string AutofillSrc = LoadResource($"{KafkaAutofillAttribute}.cs");
     
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -134,6 +136,8 @@ internal class KafkaAutofill : IIncrementalGenerator
 
     private static void RegisterPostInitializationOutput(IncrementalGeneratorPostInitializationContext postContext)
     {
+        postContext.AddSource("AvroIgnoreAttribute.g.cs", SourceText.From(AvroIgnoreSrc, Encoding.UTF8));
+        postContext.AddSource("KafkaAutofillAttribute.g.cs", SourceText.From(AutofillSrc, Encoding.UTF8));
         postContext.AddSource("AvroSchemaGen.g.cs", SourceText.From(AvroGenSrc, Encoding.UTF8));
     }
 
