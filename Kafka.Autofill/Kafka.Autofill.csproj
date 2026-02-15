@@ -7,6 +7,21 @@
         <IsRoslynComponent>true</IsRoslynComponent>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        
+        <!-- Package metadata -->
+        <PackageId>Kafka.Autofill</PackageId>
+        <Version>0.5.0</Version>
+        <Authors>David Hade</Authors>
+        <Company>David Hade</Company>
+        <Description>Source generator for Apache Avro serialization in Kafka. Automatically generates Get/Put methods and schema for ISpecificRecord implementations.</Description>
+        <PackageProjectUrl>https://github.com/DavidHade/KafkaAutofill</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/DavidHade/KafkaAutofill</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>kafka;avro;serialization;source-generator;analyzer</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <DevelopmentDependency>true</DevelopmentDependency>
     </PropertyGroup>
 
     <ItemGroup>
