@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kafka.Autofill.Tests", "Kaf
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kafka.Autofill.Perf", "Kafka.Autofill.Perf\Kafka.Autofill.Perf.csproj", "{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kafka.Autofill.Nuget.Tests", "Kafka.Autofill.Nuget.Tests\Kafka.Autofill.Nuget.Tests.csproj", "{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

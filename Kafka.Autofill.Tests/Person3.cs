@@ -1,3 +1,4 @@
+// ReSharper disable MemberCanBePrivate.Global
 using Avro;
 using Avro.Specific;
 
@@ -54,26 +55,27 @@ public partial class Person3 : ISpecificRecord
     public IDictionary<string, int> Stats { get; set; } = new Dictionary<string, int>();
     
     // Enum
-    public GenderEnum Gender { get; set; }
-    public GenderEnum? OptionalGender { get; set; }
+    public GenderEnum3 Gender { get; set; }
+    public GenderEnum3? OptionalGender { get; set; }
     
     // Nested records
-    public Address HomeAddress { get; set; } =  new();
-    public Address? OfficeAddress { get; set; }
+    public Address3 HomeAddress { get; set; } =  new();
+    public Address3? OfficeAddress { get; set; }
     
     // Complex collections
-    public List<Address> PreviousAddresses { get; set; } = [];
-    public Dictionary<string, Address> AddressBook { get; set; } = [];
+    public List<Address3> PreviousAddresses { get; set; } = [];
+    public Dictionary<string, Address3> AddressBook { get; set; } = [];
 }
 
-public class Address
+[KafkaAutofill]
+public partial class Address3 : ISpecificRecord
 {
     public string Street { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string ZipCode { get; set; } = string.Empty;
 }
 
-public enum GenderEnum
+public enum GenderEnum3
 {
     Male,
     Female,
