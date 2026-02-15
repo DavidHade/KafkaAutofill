@@ -10,7 +10,7 @@
     
     <ItemGroup>
         <PackageReference Include="Apache.Avro" Version="1.12.1" />
-        <PackageReference Include="Kafka.Autofill" Version="0.7.2">
+        <PackageReference Include="Kafka.Autofill" Version="0.9.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

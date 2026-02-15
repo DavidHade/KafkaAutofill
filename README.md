@@ -79,6 +79,7 @@ public partial class Person
 ### Date/Time
 - `DateTime` (timestamp-millis)
 - `DateTimeOffset` (timestamp-millis)
+- `DateOnly` (timestamp-millis)
 
 ### Collections
 - `T[]` - Arrays

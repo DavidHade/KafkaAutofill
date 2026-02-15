@@ -11,7 +11,7 @@
         
         <!-- Package metadata -->
         <PackageId>Kafka.Autofill</PackageId>
-        <Version>0.9.0</Version>
+        <Version>0.9.1</Version>
         <Authors>David Hade</Authors>
         <Company>David Hade</Company>
         <Description>Source generator for Apache Avro serialization in Kafka. Automatically generates Get/Put methods and schema for ISpecificRecord implementations.</Description>
@@ -48,7 +48,7 @@
 
     <!-- Include the generator DLL in the analyzers folder of the package -->
     <ItemGroup>
-      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+<!--      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />-->
       <None Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 

@@ -3,9 +3,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Kafka.Autofill;
 
-/// <summary>
-/// Shared validation logic for both analyzer and source generator
-/// </summary>
 internal static class PropertyValidator
 {
     public static IEnumerable<(IPropertySymbol property, string reason)> ValidateProperties(
@@ -25,7 +22,7 @@ internal static class PropertyValidator
         return unsupportedProperties;
     }
 
-    public static string? ValidatePropertyType(ITypeSymbol type)
+    private static string? ValidatePropertyType(ITypeSymbol type)
     {
         // Handle nullable value types
         if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } namedType)
@@ -115,7 +112,7 @@ internal static class PropertyValidator
         return $"Type '{type.Name}' from namespace '{typeNamespace}' is not supported in Avro schema";
     }
 
-    public static bool IsSupportedPrimitiveType(ITypeSymbol type)
+    private static bool IsSupportedPrimitiveType(ITypeSymbol type)
     {
         var specialType = type.SpecialType;
         
