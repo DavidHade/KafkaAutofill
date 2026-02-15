@@ -7,10 +7,11 @@
         <IsRoslynComponent>true</IsRoslynComponent>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RootNamespace>Kafka.Autofill</RootNamespace>
         
         <!-- Package metadata -->
         <PackageId>Kafka.Autofill</PackageId>
-        <Version>0.6.0</Version>
+        <Version>0.7.0</Version>
         <Authors>David Hade</Authors>
         <Company>David Hade</Company>
         <Description>Source generator for Apache Avro serialization in Kafka. Automatically generates Get/Put methods and schema for ISpecificRecord implementations.</Description>
@@ -42,5 +43,20 @@
       <EmbeddedResource Include="KafkaAutofillAttribute.cs" />
       <None Remove="KafkaAutofillAttribute.cs" />
     </ItemGroup>
+
+    <!-- Include the generator DLL in the analyzers folder of the package -->
+    <ItemGroup>
+      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+    
+    <PropertyGroup>
+      <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+    </PropertyGroup>
+    
+    <Target Name="GetDependencyTargetPaths">
+      <ItemGroup>
+        <TargetPathWithTargetPlatformMoniker Include="$(PKGNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" IncludeRuntimeDependency="false" />
+      </ItemGroup>
+    </Target>
 
 </Project>
