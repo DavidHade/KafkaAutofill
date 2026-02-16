@@ -4,8 +4,13 @@ using Avro.Specific;
 
 namespace Kafka.Autofill.Tests.Person2;
 
+public abstract class Event2
+{
+    public Guid EventId { get; set; }
+}
+
 [KafkaAutofill(false)]
-public partial class Person2 : ISpecificRecord
+public partial class Person2 : Event2, ISpecificRecord
 {
     [AvroIgnore]
     public Schema Schema { get; set; } = Schema.Parse(AvroSchemaGen.GenerateSchema(typeof(Person2)));

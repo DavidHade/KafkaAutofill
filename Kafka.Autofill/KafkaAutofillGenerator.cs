@@ -96,13 +96,7 @@ internal class KafkaAutofill : IIncrementalGenerator
             var generateSchema = kafkaAttribute.ConstructorArguments.Length > 0
                                  && kafkaAttribute.ConstructorArguments[0].Value is true;
             
-            var properties = classSymbol.GetMembers()
-                .OfType<IPropertySymbol>()
-                .Where(p => p.DeclaredAccessibility == Accessibility.Public && 
-                            !p.IsStatic && 
-                            !p.IsIndexer &&
-                            p.Name != "Schema") // Exclude Schema property
-                .ToList();
+            var properties = GetAllProperties(classSymbol);
             
             if (!ValidateTargets(context, properties, classDeclaration)) 
                 continue; // Skip code generation for this class
@@ -110,6 +104,44 @@ internal class KafkaAutofill : IIncrementalGenerator
             var source = GenerateClass(classSymbol, properties, generateSchema);
             context.AddSource($"{classDeclaration.Identifier}_Generated.g.cs", SourceText.From(source, Encoding.UTF8));
         }
+    }
+
+    private static List<IPropertySymbol> GetAllProperties(INamedTypeSymbol classSymbol)
+    {
+        // Collect all types in inheritance chain from base to derived
+        var typeHierarchy = new List<INamedTypeSymbol>();
+        var currentType = classSymbol;
+        
+        while (currentType != null && currentType.SpecialType != SpecialType.System_Object)
+        {
+            typeHierarchy.Add(currentType);
+            currentType = currentType.BaseType;
+        }
+        
+        // Reverse to process from base to derived
+        typeHierarchy.Reverse();
+        
+        var properties = new List<IPropertySymbol>();
+        var processedNames = new HashSet<string>();
+        
+        foreach (var type in typeHierarchy)
+        {
+            var currentProperties = type.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.DeclaredAccessibility is Accessibility.Public &&
+                            !p.IsStatic &&
+                            !p.IsIndexer &&
+                            p.Name != "Schema" && // Exclude Schema property
+                            !processedNames.Contains(p.Name)); // Avoid duplicates from overridden properties
+            
+            foreach (var prop in currentProperties)
+            {
+                properties.Add(prop);
+                processedNames.Add(prop.Name);
+            }
+        }
+        
+        return properties;
     }
 
     private static bool ValidateTargets(

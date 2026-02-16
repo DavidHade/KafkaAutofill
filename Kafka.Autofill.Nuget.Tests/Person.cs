@@ -3,8 +3,13 @@ using Kafka.Autofill;
 
 namespace Nuget.Test;
 
+public abstract class Event
+{
+    public Guid EventId { get; set; }
+}
+
 [KafkaAutofill]
-public partial class Person : ISpecificRecord
+public partial class Person : Event, ISpecificRecord
 {
     public int Age { get; set; }
     public uint UnsignedAge { get; set; }

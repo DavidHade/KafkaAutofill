@@ -45,25 +45,55 @@ internal static class AvroSchemaGen
     private static IEnumerable<Dictionary<string, object>> GenerateFields(Type type, HashSet<string> definedTypes)
     {
         var avroIgnoreAttr = Type.GetType("Kafka.Autofill.AvroIgnoreAttribute")!;
-        var publicFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-        var fields = publicFields
-            .Where(field => field.GetCustomAttribute(avroIgnoreAttr) == null)
-            .Select(field => new Dictionary<string, object>
-            {
-                ["name"] = field.Name,
-                ["type"] = MapCSharpTypeToAvro(field.FieldType, IsNullable(field), definedTypes)
-            });
         
-        var publicProperties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        var properties = publicProperties
-            .Where(property => property.GetCustomAttribute(avroIgnoreAttr) == null)
-            .Select(property => new Dictionary<string, object>
-            {
-                ["name"] = property.Name, 
-                ["type"] = MapCSharpTypeToAvro(property.PropertyType, IsNullable(property), definedTypes)
-            });
+        // Collect all types in inheritance chain from base to derived
+        var typeHierarchy = new List<Type>();
+        var currentType = type;
+        while (currentType != null && currentType != typeof(object))
+        {
+            typeHierarchy.Add(currentType);
+            currentType = currentType.BaseType;
+        }
+        typeHierarchy.Reverse();
+        
+        var allFields = new List<Dictionary<string, object>>();
+        var processedNames = new HashSet<string>();
+        
+        foreach (var t in typeHierarchy)
+        {
+            var publicFields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var fields = publicFields
+                .Where(field => field.GetCustomAttribute(avroIgnoreAttr) == null && !processedNames.Contains(field.Name))
+                .Select(field =>
+                {
+                    processedNames.Add(field.Name);
+                    return new Dictionary<string, object>
+                    {
+                        ["name"] = field.Name,
+                        ["type"] = MapCSharpTypeToAvro(field.FieldType, IsNullable(field), definedTypes)
+                    };
+                });
+            allFields.AddRange(fields);
+        }
+        
+        foreach (var t in typeHierarchy)
+        {
+            var publicProperties = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var properties = publicProperties
+                .Where(property => property.GetCustomAttribute(avroIgnoreAttr) == null && !processedNames.Contains(property.Name))
+                .Select(property =>
+                {
+                    processedNames.Add(property.Name);
+                    return new Dictionary<string, object>
+                    {
+                        ["name"] = property.Name, 
+                        ["type"] = MapCSharpTypeToAvro(property.PropertyType, IsNullable(property), definedTypes)
+                    };
+                });
+            allFields.AddRange(properties);
+        }
 
-        return fields.Concat(properties);
+        return allFields;
     }
 
     private static object MapCSharpTypeToAvro(Type type, bool isNullableFromContext, HashSet<string> definedTypes)

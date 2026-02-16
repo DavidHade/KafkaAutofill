@@ -2,8 +2,13 @@ using Avro.Specific;
 
 namespace Kafka.Autofill.Tests;
 
+public abstract class Event
+{
+    public Guid EventId { get; set; }
+}
+
 [KafkaAutofill]
-public partial class Person : ISpecificRecord
+public partial class Person : Event, ISpecificRecord
 {
     // Primitive types
     public int Age { get; set; }
