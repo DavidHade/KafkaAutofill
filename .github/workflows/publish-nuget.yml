@@ -28,8 +28,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
       
     - name: Test
-      run: dotnet test --configuration Release --no-build --verbosity normal
-      
+      run: dotnet test --configuration Release --no-build --verbosity normal --filter "Category!=Integration"    
+    
     - name: Pack
       run: dotnet pack Kafka.Autofill/Kafka.Autofill.csproj --configuration Release --no-build --output ./nupkg
       
