@@ -1,6 +1,6 @@
-# Kafka.Autofill
+# Avro.Autofill
 
-[![NuGet](https://img.shields.io/nuget/v/Kafka.Autofill.svg)](https://www.nuget.org/packages/Kafka.Autofill/)
+[![NuGet](https://img.shields.io/nuget/v/Avro.Autofill.svg)](https://www.nuget.org/packages/Avro.Autofill/)
 
 A C# source generator and analyzer for Apache Avro serialization in Kafka. Automatically generates `Get()` and `Put()` methods and Avro schemas for `ISpecificRecord` implementations.
 
@@ -14,13 +14,13 @@ A C# source generator and analyzer for Apache Avro serialization in Kafka. Autom
 
 ## Quick Start
 
-### 1. Mark your class with `[KafkaAutofill]`
+### 1. Mark your class with `[AvroAutofill]`
 
 ```csharp
-using Kafka.Autofill;
+using Avro.Autofill;
 using Avro.Specific;
 
-[KafkaAutofill] // Generates Get(), Put(), and Schema
+[AvroAutofill] // Generates Get(), Put(), and Schema
 public partial class Person : ISpecificRecord
 {
     public int Age { get; set; }
@@ -95,7 +95,7 @@ public partial class Person
 ### Nested Types
 
 ```csharp
-[KafkaAutofill]
+[AvroAutofill]
 public partial class Person : ISpecificRecord
 {
     public string Name { get; set; } = string.Empty;
@@ -103,7 +103,7 @@ public partial class Person : ISpecificRecord
     public List<Address> PreviousAddresses { get; set; } = [];
 }
 
-[KafkaAutofill]
+[AvroAutofill]
 public partial class Address : ISpecificRecord
 {
     public string Street { get; set; } = string.Empty;
@@ -116,7 +116,7 @@ public partial class Address : ISpecificRecord
 The analyzer provides **real-time errors** for unsupported types:
 
 ```csharp
-[KafkaAutofill]
+[AvroAutofill]
 public partial class MyClass : ISpecificRecord
 {
     // ❌ ERROR: Type 'HttpClient' from namespace 'System.Net.Http' is not supported in Avro schema
@@ -132,7 +132,7 @@ public partial class MyClass : ISpecificRecord
 Use `[AvroIgnore]` to exclude properties from serialization:
 
 ```csharp
-[KafkaAutofill]
+[AvroAutofill]
 public partial class Person : ISpecificRecord
 {
     public string Name { get; set; } = string.Empty;
@@ -146,13 +146,13 @@ public partial class Person : ISpecificRecord
 
 ### Generate schema (default)
 ```csharp
-[KafkaAutofill] // or [KafkaAutofill(true)]
+[AvroAutofill] // or [AvroAutofill(true)]
 public partial class Person : ISpecificRecord { }
 ```
 
 ### Skip schema generation
 ```csharp
-[KafkaAutofill(false)]
+[AvroAutofill(false)]
 public partial class Person : ISpecificRecord { }
 ```
 
@@ -164,7 +164,7 @@ public partial class Person : ISpecificRecord { }
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or pull request on [GitHub](https://github.com/DavidHade/KafkaAutofill).
+Contributions are welcome! Please open an issue or pull request on [GitHub](https://github.com/DavidHade/AvroAutofill).
 
 ## License
 

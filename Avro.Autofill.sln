@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avro.Autofill", "Avro.Autofill\Avro.Autofill.csproj", "{2FCFB4F6-7926-485E-A3AA-3017FEA87123}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avro.Autofill.Tests", "Avro.Autofill.Tests\Avro.Autofill.Tests.csproj", "{2B40FAF1-D1B5-4E27-8B7E-BED14A6A63D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avro.Autofill.Perf", "Avro.Autofill.Perf\Avro.Autofill.Perf.csproj", "{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avro.Autofill.Nuget.Tests", "Avro.Autofill.Nuget.Tests\Avro.Autofill.Nuget.Tests.csproj", "{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2BE41B2D-2D36-4E19-898F-5DAA6119A621}"
+	ProjectSection(SolutionItems) = preProject
+		icon.png = icon.png
+		icon.svg = icon.svg
+		README.md = README.md
+		LICENSE = LICENSE
+		.runsettings = .runsettings
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avro.Autofill.IntegrationTests", "Avro.Autofill.IntegrationTests\Avro.Autofill.IntegrationTests.csproj", "{E5095155-EDBA-45B2-8554-19CD87EB3B91}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FCFB4F6-7926-485E-A3AA-3017FEA87123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FCFB4F6-7926-485E-A3AA-3017FEA87123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FCFB4F6-7926-485E-A3AA-3017FEA87123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FCFB4F6-7926-485E-A3AA-3017FEA87123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B40FAF1-D1B5-4E27-8B7E-BED14A6A63D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B40FAF1-D1B5-4E27-8B7E-BED14A6A63D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B40FAF1-D1B5-4E27-8B7E-BED14A6A63D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B40FAF1-D1B5-4E27-8B7E-BED14A6A63D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E4B0F7F-AFFB-4278-A93D-B7541699F20B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF8282E5-DF6D-4F8D-8391-E43F011DADB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5095155-EDBA-45B2-8554-19CD87EB3B91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5095155-EDBA-45B2-8554-19CD87EB3B91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5095155-EDBA-45B2-8554-19CD87EB3B91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5095155-EDBA-45B2-8554-19CD87EB3B91}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

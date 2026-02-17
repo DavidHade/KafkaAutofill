@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsRoslynComponent>true</IsRoslynComponent>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RootNamespace>Avro.Autofill</RootNamespace>
+        
+        <!-- Package metadata -->
+        <PackageId>Avro.Autofill</PackageId>
+        <Version>0.9.7</Version>
+        <Authors>David Hade</Authors>
+        <Company>David Hade</Company>
+        <Description>Source generator for Apache Avro serialization in Kafka. Automatically generates Get/Put methods and schema for ISpecificRecord implementations.</Description>
+        <PackageProjectUrl>https://github.com/DavidHade/KafkaAutofill</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/DavidHade/KafkaAutofill</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>kafka;avro;serialization;source-generator;analyzer</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <DevelopmentDependency>true</DevelopmentDependency>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+      <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" PrivateAssets="all" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" GeneratePathProperty="true" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="../README.md" Pack="true" PackagePath="/" />
+      <None Include="../icon.png" Pack="true" PackagePath="/" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="AvroSchemaGen.cs" />
+      <None Remove="AvroSchemaGen.cs" />
+      <EmbeddedResource Include="AvroIgnoreAttribute.cs" />
+      <None Remove="AvroIgnoreAttribute.cs" />
+      <EmbeddedResource Include="AvroAutofillAttribute.cs" />
+      <None Remove="KafkaAutofillAttribute.cs" />
+    </ItemGroup>
+
+    <!-- Include the generator DLL in the analyzers folder of the package -->
+    <ItemGroup>
+      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+      <None Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+</Project>

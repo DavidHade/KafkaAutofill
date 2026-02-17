@@ -1,0 +1,175 @@
+{
+  "type" : "record",
+  "name" : "Person",
+  "namespace" : "Avro.Autofill.Tests",
+  "fields" : [ {
+    "name" : "Age",
+    "type" : "int"
+  }, {
+    "name" : "UnsignedAge",
+    "type" : "int"
+  }, {
+    "name" : "LongValue",
+    "type" : "long"
+  }, {
+    "name" : "UnsignedLongValue",
+    "type" : "long"
+  }, {
+    "name" : "Height",
+    "type" : "float"
+  }, {
+    "name" : "Weight",
+    "type" : "double"
+  }, {
+    "name" : "Salary",
+    "type" : "double"
+  }, {
+    "name" : "IsActive",
+    "type" : "boolean"
+  }, {
+    "name" : "Name",
+    "type" : "string"
+  }, {
+    "name" : "ProfilePicture",
+    "type" : "bytes"
+  }, {
+    "name" : "BirthDate",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "CreatedAt",
+    "type" : {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    }
+  }, {
+    "name" : "Id",
+    "type" : {
+      "type" : "string",
+      "logicalType" : "uuid"
+    }
+  }, {
+    "name" : "OptionalAge",
+    "type" : [ "null", "int" ]
+  }, {
+    "name" : "OptionalWeight",
+    "type" : [ "null", "double" ]
+  }, {
+    "name" : "OptionalSalary",
+    "type" : [ "null", "double" ]
+  }, {
+    "name" : "OptionalFlag",
+    "type" : [ "null", "boolean" ]
+  }, {
+    "name" : "OptionalDate",
+    "type" : [ "null", {
+      "type" : "long",
+      "logicalType" : "timestamp-millis"
+    } ]
+  }, {
+    "name" : "OptionalId",
+    "type" : [ "null", {
+      "type" : "string",
+      "logicalType" : "uuid"
+    } ]
+  }, {
+    "name" : "Scores",
+    "type" : {
+      "type" : "array",
+      "items" : "int"
+    }
+  }, {
+    "name" : "Tags",
+    "type" : {
+      "type" : "array",
+      "items" : "string"
+    }
+  }, {
+    "name" : "Hobbies",
+    "type" : {
+      "type" : "array",
+      "items" : "string"
+    }
+  }, {
+    "name" : "Skills",
+    "type" : {
+      "type" : "array",
+      "items" : "string"
+    }
+  }, {
+    "name" : "Ratings",
+    "type" : {
+      "type" : "array",
+      "items" : "int"
+    }
+  }, {
+    "name" : "Achievements",
+    "type" : {
+      "type" : "array",
+      "items" : "string"
+    }
+  }, {
+    "name" : "Measurements",
+    "type" : {
+      "type" : "array",
+      "items" : "double"
+    }
+  }, {
+    "name" : "Metadata",
+    "type" : {
+      "type" : "map",
+      "values" : "string"
+    }
+  }, {
+    "name" : "Stats",
+    "type" : {
+      "type" : "map",
+      "values" : "int"
+    }
+  }, {
+    "name" : "Gender",
+    "type" : {
+      "type" : "enum",
+      "name" : "GenderEnum",
+      "namespace" : "Avro.Autofill.Tests",
+      "symbols" : [ "Male", "Female", "Other" ]
+    }
+  }, {
+    "name" : "OptionalGender",
+    "type" : [ "null", "GenderEnum" ]
+  }, {
+    "name" : "HomeAddress",
+    "type" : {
+      "type" : "record",
+      "name" : "Address",
+      "namespace" : "Avro.Autofill.Tests",
+      "fields" : [ {
+        "name" : "Street",
+        "type" : "string"
+      }, {
+        "name" : "City",
+        "type" : "string"
+      }, {
+        "name" : "ZipCode",
+        "type" : "string"
+      } ]
+    }
+  }, {
+    "name" : "OfficeAddress",
+    "type" : [ "null", "Address" ]
+  }, {
+    "name" : "PreviousAddresses",
+    "type" : {
+      "type" : "array",
+      "items" : "Address"
+    }
+  }, {
+    "name" : "AddressBook",
+    "type" : {
+      "type" : "map",
+      "values" : "Address"
+    }
+  } ]
+}
