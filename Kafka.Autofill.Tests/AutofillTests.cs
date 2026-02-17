@@ -136,49 +136,7 @@ public class AutofillTests
     [Fact]
     public void Person_Get_And_Put_Should_Be_Reversible()
     {
-        var person = new Person
-        {
-            Age = 30,
-            UnsignedAge = 30u,
-            LongValue = 1000000L,
-            UnsignedLongValue = 1000000UL,
-            Height = 5.9f,
-            Weight = 180.5,
-            Salary = 75000.50m,
-            IsActive = true,
-            Name = "John Doe",
-            ProfilePicture = [1, 2, 3],
-            BirthDate = new DateTime(1994, 1, 15),
-            DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow),
-            OptionalDateOfBirthNonNull = DateOnly.FromDateTime(DateTime.UtcNow),
-            OptionalDateOfBirthNull = null,
-            CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
-            Id = Guid.NewGuid(),
-            OptionalAge = 25,
-            OptionalWeight = 175.5,
-            OptionalSalary = 75000.50m,
-            OptionalFlag = true,
-            OptionalDate = new DateTime(2023, 1, 1),
-            OptionalId = Guid.NewGuid(),
-            Scores = [85, 90, 95],
-            Tags = ["developer", "tester"],
-            Hobbies = ["reading", "coding"],
-            Skills = ["C#", "Python"],
-            Ratings = new List<int> { 1, 2, 3 },
-            Achievements = new List<string> { "Award1" },
-            Measurements = new List<double> { 1.1, 2.2 },
-            Metadata = new Dictionary<string, string> { { "key1", "value1" } },
-            Stats = new Dictionary<string, int> { { "points", 100 } },
-            Gender = GenderEnum.Male,
-            OptionalGender = GenderEnum.Female,
-            HomeAddress = new Address { Street = "123 Main St", City = "NYC", ZipCode = "10001" },
-            OfficeAddress = new Address { Street = "456 Work Ave", City = "LA", ZipCode = "90001" },
-            PreviousAddresses = [new Address { Street = "789 Old Rd", City = "Chicago", ZipCode = "60601" }],
-            AddressBook = new Dictionary<string, Address>
-            {
-                { "home", new Address { Street = "Home St", City = "Boston", ZipCode = "02101" } }
-            }
-        };
+        var person = TestData.Person;
 
         var schema = person.Schema as RecordSchema;
 
@@ -434,44 +392,29 @@ public class AutofillTests
     [Fact]
     public void Person_Get_Should_Return_Correct_Values_For_All_Fields()
     {
-        var guid = Guid.NewGuid();
-        var birthDate = new DateTime(1990, 5, 15);
-        var person = new Person
-        {
-            Age = 33,
-            UnsignedAge = 33u,
-            LongValue = 999999L,
-            UnsignedLongValue = 999999UL,
-            Height = 6.1f,
-            Weight = 190.5,
-            Salary = 85000m,
-            IsActive = false,
-            Name = "Alice",
-            ProfilePicture = [5, 6, 7, 8],
-            BirthDate = birthDate,
-            DateOfBirth = DateOnly.FromDateTime(birthDate),
-            OptionalDateOfBirthNull = null,
-            Id = guid
-        };
+        var birthDate = new DateTime(1994, 1, 15);
+        var person = TestData.Person;
+        person.DateOfBirth = DateOnly.FromDateTime(birthDate);
+        person.OptionalDateOfBirthNull = null;
 
         var schema = person.Schema as RecordSchema;
         Assert.NotNull(schema);
         
         var ageField = schema.Fields.FirstOrDefault(f => f.Name == "Age");
         Assert.NotNull(ageField);
-        Assert.Equal(33, person.Get(ageField.Pos));
+        Assert.Equal(30, person.Get(ageField.Pos));
 
         var nameField = schema.Fields.FirstOrDefault(f => f.Name == "Name");
         Assert.NotNull(nameField);
-        Assert.Equal("Alice", person.Get(nameField.Pos));
+        Assert.Equal("John Doe", person.Get(nameField.Pos));
 
         var heightField = schema.Fields.FirstOrDefault(f => f.Name == "Height");
         Assert.NotNull(heightField);
-        Assert.Equal(6.1f, person.Get(heightField.Pos));
+        Assert.Equal(5.9f, person.Get(heightField.Pos));
 
         var isActiveField = schema.Fields.FirstOrDefault(f => f.Name == "IsActive");
         Assert.NotNull(isActiveField);
-        Assert.Equal(false, person.Get(isActiveField.Pos));
+        Assert.Equal(true, person.Get(isActiveField.Pos));
 
         var birthDateField = schema.Fields.FirstOrDefault(f => f.Name == "BirthDate");
         Assert.NotNull(birthDateField);
@@ -487,7 +430,7 @@ public class AutofillTests
 
         var idField = schema.Fields.FirstOrDefault(f => f.Name == "Id");
         Assert.NotNull(idField);
-        Assert.Equal(guid, person.Get(idField.Pos));
+        Assert.Equal(Guid.Parse("B381A45F-0656-4452-80ED-D734C05C6329"), person.Get(idField.Pos));
     }
 
     [Fact]

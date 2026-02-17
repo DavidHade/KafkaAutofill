@@ -109,9 +109,9 @@ internal static class AvroSchemaGen
             return new[] { "null", MapCSharpTypeToAvro(actualType, false, definedTypes) };
         }
         
-        if (type == typeof(int) || type == typeof(uint))
+        if (type == typeof(int))
             return "int";
-        if (type == typeof(long))
+        if (type == typeof(long) || type == typeof(uint))
             return "long";
         if (type == typeof(ulong))
             return "bytes";

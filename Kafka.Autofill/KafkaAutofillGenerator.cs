@@ -206,6 +206,7 @@ internal class KafkaAutofill : IIncrementalGenerator
         }
 
         sb.AppendLine();
+        sb.AppendLine("#nullable enable");
         sb.AppendLine("    public object Get(int fieldPos)");
         sb.AppendLine("    {");
         sb.AppendLine("        return fieldPos switch");
@@ -221,6 +222,7 @@ internal class KafkaAutofill : IIncrementalGenerator
         sb.AppendLine($"            _ => {outOfRage}");
         sb.AppendLine("        };");
         sb.AppendLine("    }");
+        sb.AppendLine("#nullable restore");
         sb.AppendLine();
 
         sb.AppendLine("#nullable enable");
@@ -266,10 +268,17 @@ internal class KafkaAutofill : IIncrementalGenerator
                 return $"{propertyName}.HasValue ? (long){propertyName}.Value : (long?)null";
             if (underlyingSpecialType == SpecialType.System_UInt64)
                 return $"{propertyName}.HasValue ? System.BitConverter.GetBytes({propertyName}.Value) : (byte[]?)null";
-
-            // DateOnly
+            
+            // Decimal
+            if (underlyingSpecialType == SpecialType.System_Decimal)
+                return $"(double?){propertyName}";
+            
+            // Date / Time
             if(underlyingType.ToDisplayString() == "System.DateOnly")
-                return $"{propertyName}?.ToDateTime(TimeOnly.MinValue)";
+                return $"{propertyName}?.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)";
+            
+            if(fullTypeName == "System.DateTimeOffset")
+                return $"{propertyName}?.DateTime";
             
             // Other nullable types (int?, double?, bool?, etc.)
             return propertyName;
@@ -279,8 +288,12 @@ internal class KafkaAutofill : IIncrementalGenerator
         if (specialType == SpecialType.System_Decimal)
             return $"(double){propertyName}";
         
+        // Date / Time
         if(fullTypeName == "System.DateOnly")
-            return $"{propertyName}.ToDateTime(TimeOnly.MinValue)";
+            return $"{propertyName}.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)";
+        
+        if(fullTypeName == "System.DateTimeOffset")
+            return $"{propertyName}.DateTime";
         
         // Unsigned types -> cast to int/long or bytes
         if (specialType == SpecialType.System_UInt16)
@@ -289,7 +302,11 @@ internal class KafkaAutofill : IIncrementalGenerator
             return $"(long){propertyName}";
         if (specialType == SpecialType.System_UInt64)
             return $"BitConverter.GetBytes({propertyName})";
-
+        
+        if (type is IArrayTypeSymbol arrayTypeSymbol 
+            && arrayTypeSymbol.ElementType.OriginalDefinition.SpecialType != SpecialType.System_Byte)
+            return $"{propertyName}.ToList()";
+        
         // Collections that need conversion
         if (type is INamedTypeSymbol genericType && genericType.IsGenericType)
         {
@@ -313,13 +330,14 @@ internal class KafkaAutofill : IIncrementalGenerator
         {
             var underlyingType = namedType.TypeArguments[0];
             var underlyingTypeName = underlyingType.ToDisplayString();
+            var underlyingSpecialType = underlyingType.SpecialType;
             
             // Nullable DateTime & DateOnly
             if (underlyingTypeName == "System.DateTime")
                 return $"(DateTime?){expr}";
-
+            
             if (underlyingTypeName == "System.DateTimeOffset")
-                return $"(DateTimeOffset?){expr}";
+                return $"(DateTimeOffset?)(DateTime?){expr}";
             
             if(underlyingTypeName == "System.DateOnly")
                 return $"{expr} == null ? (DateOnly?)null : DateOnly.FromDateTime((DateTime){expr})";
@@ -327,6 +345,14 @@ internal class KafkaAutofill : IIncrementalGenerator
             // Nullable Guid from string
             if (underlyingTypeName == "System.Guid")
                 return $"(Guid?){expr}";
+            
+            // UInt
+            if (underlyingSpecialType == SpecialType.System_UInt32)
+                return $"(uint?)(long?){expr}";
+            
+            // Decimal, SpecialType.System_Decimal does not work?
+            if (underlyingSpecialType == SpecialType.System_Decimal)
+                return $"(decimal?)(double?){expr}";
 
             // Nullable enums from string
             if (underlyingType.TypeKind == TypeKind.Enum)
@@ -375,22 +401,24 @@ internal class KafkaAutofill : IIncrementalGenerator
             return $"DateOnly.FromDateTime((DateTime){expr})";
 
         if (fullTypeName == "System.DateTimeOffset")
-            return $"(DateTimeOffset){expr}";
+            return $"(DateTimeOffset)(DateTime){expr}";
         
         // Guid from string
         if (fullTypeName == "System.Guid")
-        {
-            namespaces.Add("System");
             return $"(Guid){expr}";
-        }
         
         // Byte array
         if (type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Byte })
             return $"(byte[]){expr}";
         
         // Arrays - Avro deserializes as IList or object[], cast to array type
-        if (type is IArrayTypeSymbol)
-            return $"({fullTypeName}){expr}";
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            var elementType = arrayType.ElementType.ToDisplayString();
+            namespaces.Add("System.Collections.Generic");
+            namespaces.Add("System.Linq");
+            return $"((IList<{elementType}>){expr}).ToArray()";
+        }
         
         // Generic types (collections, dictionaries)
         if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
