@@ -155,10 +155,10 @@ public partial class Person : ISpecificRecord { }
 [AvroAutofill(false)]
 public partial class Person : ISpecificRecord { }
 ```
-
+~~~~
 ## Requirements
 
-- .NET Standard 2.1 or later
+- .NET Standard 2.0 or later
 - C# 9.0 or later (for source generators)
 - Apache.Avro NuGet package (for runtime)
 
